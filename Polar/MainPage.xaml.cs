@@ -34,12 +34,13 @@ namespace Polar
             if (!App.ViewModel.IsDataLoaded)
             {
                 App.ViewModel.LoadData();
+
             }
         }
 
         private void StackPanel_Tap(object sender, GestureEventArgs e)
         {
-            Console.WriteLine("This is called when the event fires.");
+            
         }
 
         private void ajouter_au_panier(string nom)

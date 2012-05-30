@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using System.Net;
+using System.Net.Browser;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Polar
 {
@@ -47,7 +50,24 @@ namespace Polar
             this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
             this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
 
+            WebRequest.RegisterPrefix("http://assos.utc.fr/polar", WebRequestCreator.ClientHttp);
+            Uri horairesUri = new Uri("http://assos.utc.fr/polar/membres/horaires?json");
+            WebClient horairesDownloader = new WebClient();
+            horairesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(horairesDownloader_OpenReadCompleted);
+            horairesDownloader.OpenReadAsync(horairesUri);
+
             this.IsDataLoaded = true;
+        }
+
+        private void horairesDownloader_OpenReadCompleted(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                JsonTextReader horaires = new JsonTextReader(new StreamReader(e.Result));
+                JsonSerializer se = new JsonSerializer();
+                object parsedData = se.Deserialize(horaires);
+
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
