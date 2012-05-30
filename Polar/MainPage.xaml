@@ -1,0 +1,71 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="Polar.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:local="clr-namespace:Polar;assembly=Polar"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768" 
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True">
+
+    <UserControl.Resources>
+        <local:NbPagestoPrix x:Key="ConvertisseurAnnales"/>
+    </UserControl.Resources>
+
+    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <!--Contrôle Pivot-->
+        <controls:Pivot Title="Le Polar">
+            <!--Élément un de tableau croisé dynamique-->
+            <controls:PivotItem Header="Horaires">
+                <!--Liste double trait avec habillage du texte-->
+                <ListBox x:Name="FirstListBox" Margin="0,0,-12,0">
+                    <TextBlock Margin="0" Name="Date" VerticalAlignment="Top" HorizontalAlignment="Center" >Le Polar est OUVERT</TextBlock><!--TextChanged="Date_TextChanged" />-->
+                </ListBox>
+            </controls:PivotItem>
+
+            <controls:PivotItem Header="News">
+
+            </controls:PivotItem>
+
+            <controls:PivotItem Header="Produits">
+
+            </controls:PivotItem>
+
+            <!--Élément deux de tableau croisé dynamique-->
+            <controls:PivotItem Header="Annales"> 
+                <!--Liste triple trait, aucun habillage du texte-->
+                    <ListBox x:Name="SecondListBox" Margin="0,0,-12,0" ItemsSource="{Binding UVs}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,17" Orientation="Horizontal" Tap="StackPanel_Tap">
+                                    <TextBlock Text="{Binding NomUV}" TextWrapping="NoWrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
+                                    <TextBlock Text="{Binding NbPages, Converter={StaticResource ConvertisseurAnnales}}" TextWrapping="NoWrap" Margin="20,0,0,0" Style="{StaticResource PhoneTextSubtleStyle}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+            </controls:PivotItem>
+        </controls:Pivot>
+    </Grid>
+ 
+    <!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
+    <!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 1"/>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+
+</phone:PhoneApplicationPage>
