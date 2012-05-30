@@ -11,6 +11,8 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using System.Collections.ObjectModel;
+using System.Net.Browser;
+using System.IO;
 
 namespace Polar
 {
@@ -41,11 +43,11 @@ namespace Polar
         private void StackPanel_Tap(object sender, GestureEventArgs e)
         {
             var a = (((StackPanel)sender).Children[0]);
-            Date.Text = ((TextBlock)a).Text;
-            ajouter_au_panier(((TextBlock)a).Text);
+            ajouterAuPanier(((TextBlock)a).Text);
+            passerCommande("superman");
         }
 
-        private void ajouter_au_panier(string nom)
+        private void ajouterAuPanier(string nom)
         {
             if (panier.Count < 8) {
                 panier.Add(nom);
@@ -53,5 +55,40 @@ namespace Polar
         }
 
         private List<string> panier;
+
+        private void passerCommande(string login)
+        {
+            if (panier.Count == 0 || panier.Count > 8) 
+            {
+                return;
+            }
+
+            var client = new WebClient();
+            var texte = "login=" + login + "&annales=";
+            int i = 0;
+            foreach (string nom in panier)
+            {
+                if (i > 0)
+                {
+                    texte += ",";
+                } 
+                texte += nom;
+                i++;
+            }
+            Date.Text = texte; // DEBUG
+            //client.UploadStringCompleted += new UploadStringCompletedEventHandler(handlerCommande);
+            client.OpenReadCompleted += new OpenReadCompletedEventHandler(handlerCommande);
+            client.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?"+texte));
+            //client.UploadStringAsync(new Uri("http://assos.utc.fr/polar/annales/borne?commander"), texte);
+        }
+
+        private void handlerCommande(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                var reply = (Stream)e.Result;
+                Date.Text = new StreamReader(reply).ReadToEnd();
+            }
+        }
     }
 }

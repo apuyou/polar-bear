@@ -44,31 +44,31 @@ namespace Polar
         /// </summary>
         public void LoadData()
         {
-            // Exemple de données ; remplacer par des données réelles
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "CM11", NbPages = 90 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "PI31", NbPages = 100 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-
-            List<Annale> deserializedUser = new List<Annale>();
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes("[{'Nom':'AP30', 'Pages':21}, {'Nom':'AR03', 'Pages':6}]"));
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
-            deserializedUser = ser.ReadObject(ms) as List<Annale>;
-            ms.Close();
-            foreach (Annale i in deserializedUser)
-            {
-                UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
-            }
-
             WebRequest.RegisterPrefix("http://assos.utc.fr/polar", WebRequestCreator.ClientHttp);
+            WebClient annalesDownloader = new WebClient();
+            annalesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(annalesRecuperees);
+            annalesDownloader.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?liste-annales"));
+
             Uri horairesUri = new Uri("http://assos.utc.fr/polar/membres/horaires?json");
             WebClient horairesDownloader = new WebClient();
             horairesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(horairesDownloader_OpenReadCompleted);
             horairesDownloader.OpenReadAsync(horairesUri);
 
             this.IsDataLoaded = true;
+        }
+
+        private void annalesRecuperees(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                List<Annale> deserializedUser = new List<Annale>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<Annale>;
+                foreach (Annale i in deserializedUser)
+                {
+                    UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
+                }
+            }
         }
 
         private void horairesDownloader_OpenReadCompleted(object sender, OpenReadCompletedEventArgs e)
