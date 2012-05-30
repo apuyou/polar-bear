@@ -40,7 +40,9 @@ namespace Polar
 
         private void StackPanel_Tap(object sender, GestureEventArgs e)
         {
-            
+            var a = (((StackPanel)sender).Children[0]);
+            Date.Text = ((TextBlock)a).Text;
+            ajouter_au_panier(((TextBlock)a).Text);
         }
 
         private void ajouter_au_panier(string nom)

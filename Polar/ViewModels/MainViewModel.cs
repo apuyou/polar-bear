@@ -16,6 +16,8 @@ using System.Net;
 using System.Net.Browser;
 using System.IO;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 namespace Polar
 {
@@ -50,6 +52,16 @@ namespace Polar
             this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
             this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
 
+            List<Annale> deserializedUser = new List<Annale>();
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes("[{'Nom':'AP30', 'Pages':21}, {'Nom':'AR03', 'Pages':6}]"));
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+            deserializedUser = ser.ReadObject(ms) as List<Annale>;
+            ms.Close();
+            foreach (Annale i in deserializedUser)
+            {
+                UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
+            }
+
             WebRequest.RegisterPrefix("http://assos.utc.fr/polar", WebRequestCreator.ClientHttp);
             Uri horairesUri = new Uri("http://assos.utc.fr/polar/membres/horaires?json");
             WebClient horairesDownloader = new WebClient();
@@ -66,7 +78,6 @@ namespace Polar
                 JsonTextReader horaires = new JsonTextReader(new StreamReader(e.Result));
                 JsonSerializer se = new JsonSerializer();
                 object parsedData = se.Deserialize(horaires);
-
             }
         }
 
@@ -79,5 +90,14 @@ namespace Polar
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+    }
+
+    [DataContract]
+    public class Annale
+    {
+        [DataMember]
+        public string Nom;
+        [DataMember]
+        public int Pages;
     }
 }

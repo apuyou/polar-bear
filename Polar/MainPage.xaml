@@ -27,7 +27,7 @@
             <controls:PivotItem Header="Horaires">
                 <!--Liste double trait avec habillage du texte-->
                 <ListBox x:Name="FirstListBox" Margin="0,0,-12,0">
-                    <TextBlock Margin="0" Name="Date" VerticalAlignment="Top" HorizontalAlignment="Center" >Le Polar est OUVERT</TextBlock><!--TextChanged="Date_TextChanged" />-->
+                    <TextBlock Margin="0" x:Name="Date" VerticalAlignment="Top" HorizontalAlignment="Center" >Le Polar est OUVERT</TextBlock><!--TextChanged="Date_TextChanged" />-->
                 </ListBox>
             </controls:PivotItem>
 
