@@ -27,7 +27,7 @@
                 <ListBox x:Name="NewsListBox" Margin="0,0,-12,0" ItemsSource="{Binding News}" Grid.Row="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="0,0,0,17" Orientation="Vertical" Tap="StackPanel_Tap">
+                            <StackPanel Margin="0,0,0,17" Orientation="Vertical">
                                 <TextBlock FontWeight="Normal" Text="{Binding titre}" TextWrapping="Wrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
                                 <TextBlock Text="{Binding prenom}" TextWrapping="NoWrap" Margin="20,0,0,0" Style="{StaticResource PhoneTextSubtleStyle}" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding contenu}" TextWrapping="Wrap" Margin="20,10,0,0" />
@@ -41,9 +41,23 @@
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem Header="Horaires">
                 <!--Liste double trait avec habillage du texte-->
-                <ListBox x:Name="FirstListBox" Margin="0,0,-12,0">
-                    <TextBlock Margin="0" x:Name="Date" VerticalAlignment="Top" HorizontalAlignment="Center" >Le Polar est OUVERT</TextBlock><!--TextChanged="Date_TextChanged" />-->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80" />
+                        <RowDefinition Height="530" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cette page indique le nombre de permanenciers inscrits à chaque heure. Attention : horaires non garantis !" Grid.Row="0" TextWrapping="Wrap"/>
+                    <ListBox x:Name="HorairesListBox" Margin="0,0,-12,0" ItemsSource="{Binding Horaires}" Grid.Row="2" HorizontalAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,17" Orientation="Horizontal">
+                                <TextBlock FontWeight="Normal" Text="{Binding Jour}" TextWrapping="NoWrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
+                                <TextBlock Text="{Binding Heures}" TextWrapping="NoWrap" Margin="50,0,0,0" Style="{StaticResource PhoneTextSubtleStyle}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
                 </ListBox>
+                </Grid>
             </controls:PivotItem>
 
          
@@ -71,6 +85,7 @@
                 </Grid>
             </controls:PivotItem>
         </controls:Pivot>
+        
     </Grid>
  
     <!--Exemple de code illustrant l'utilisation d'ApplicationBar-->

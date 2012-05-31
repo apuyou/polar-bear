@@ -27,6 +27,7 @@ namespace Polar
         {
             this.UVs = new ObservableCollection<UVViewModel>();
             this.News = new ObservableCollection<NewsViewModel>();
+            this.Horaires = new ObservableCollection<HorairesViewModel>();
         }
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace Polar
         /// </summary>
         public ObservableCollection<UVViewModel> UVs { get; private set; }
         public ObservableCollection<NewsViewModel> News { get; private set; }
+        public ObservableCollection<HorairesViewModel> Horaires { get; private set; }
 
         public bool IsDataLoaded
         {
@@ -95,9 +97,14 @@ namespace Polar
         {
             if (e.Error == null)
             {
-                JsonTextReader horaires = new JsonTextReader(new StreamReader(e.Result));
-                JsonSerializer se = new JsonSerializer();
-                object parsedData = se.Deserialize(horaires);
+
+                List<Horaire> deserializedUser = new List<Horaire>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<Horaire>;
+                foreach (Horaire i in deserializedUser)
+                {
+                    Horaires.Add(new HorairesViewModel() { Jour = i.jour, Heures = i.heures});
+                }
             }
         }
 
@@ -121,6 +128,14 @@ namespace Polar
         public int Pages;
     }
 
+    [DataContract]
+    public class Horaire
+    {
+        [DataMember]
+        public string jour;
+        [DataMember]
+        public string heures;
+    }
 
     [DataContract]
     public class News

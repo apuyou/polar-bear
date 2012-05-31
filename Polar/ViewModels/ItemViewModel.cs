@@ -165,4 +165,58 @@ namespace Polar
             }
         }
     }
+    public class HorairesViewModel : INotifyPropertyChanged
+    {
+        private string _Jour;
+        /// <summary>
+        /// Exemple de propriété ViewModel ; cette propriété est utilisée dans la vue pour afficher sa valeur à l'aide d'une liaison.
+        /// </summary>
+        /// <returns></returns>
+        public string Jour
+        {
+            get
+            {
+                return _Jour;
+            }
+            set
+            {
+                if (value != _Jour)
+                {
+                    _Jour = value;
+                    NotifyPropertyChanged("Jour");
+                }
+            }
+        }
+
+        private string _Heures;
+        /// <summary>
+        /// Exemple de propriété ViewModel ; cette propriété est utilisée dans la vue pour afficher sa valeur à l'aide d'une liaison.
+        /// </summary>
+        /// <returns></returns>
+        public string Heures
+        {
+            get
+            {
+                return _Heures;
+            }
+            set
+            {
+                if (value != _Heures)
+                {
+                    _Heures = value;
+                    NotifyPropertyChanged("Heures");
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (null != handler)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
 }
