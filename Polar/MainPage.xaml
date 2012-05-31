@@ -13,7 +13,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="True">
+    shell:SystemTray.IsVisible="True" xmlns:my="clr-namespace:Microsoft.Phone.Controls.Maps;assembly=Microsoft.Phone.Controls.Maps">
 
     <UserControl.Resources>
         <local:NbPagestoPrix x:Key="ConvertisseurAnnales"/>
@@ -23,6 +23,21 @@
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Contrôle Pivot-->
         <controls:Pivot Title="Le Polar">
+            <controls:PivotItem Header="News">
+                <ListBox x:Name="NewsListBox" Margin="0,0,-12,0" ItemsSource="{Binding News}" Grid.Row="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,17" Orientation="Vertical" Tap="StackPanel_Tap">
+                                <TextBlock FontWeight="Normal" Text="{Binding titre}" TextWrapping="Wrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
+                                <TextBlock Text="{Binding prenom}" TextWrapping="NoWrap" Margin="20,0,0,0" Style="{StaticResource PhoneTextSubtleStyle}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding contenu}" TextWrapping="Wrap" Margin="20,10,0,0" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </controls:PivotItem>
+
+
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem Header="Horaires">
                 <!--Liste double trait avec habillage du texte-->
@@ -31,27 +46,29 @@
                 </ListBox>
             </controls:PivotItem>
 
-            <controls:PivotItem Header="News">
-
-            </controls:PivotItem>
-
-            <controls:PivotItem Header="Produits">
-
-            </controls:PivotItem>
-
+         
             <!--Élément deux de tableau croisé dynamique-->
-            <controls:PivotItem Header="Annales"> 
+            <controls:PivotItem Header="Annales">
                 <!--Liste triple trait, aucun habillage du texte-->
-                    <ListBox x:Name="SecondListBox" Margin="0,0,-12,0" ItemsSource="{Binding UVs}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="527" />
+                        <RowDefinition Height="80" />
+                    </Grid.RowDefinitions>
+                    <ListBox x:Name="SecondListBox" Margin="0,0,-12,0" ItemsSource="{Binding UVs}" Grid.Row="0">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,0,0,17" Orientation="Horizontal" Tap="StackPanel_Tap">
-                                    <TextBlock Text="{Binding NomUV}" TextWrapping="NoWrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
+                                    <TextBlock FontWeight="Normal" Text="{Binding NomUV}" TextWrapping="NoWrap" Margin="12,0,0,0" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
                                     <TextBlock Text="{Binding NbPages, Converter={StaticResource ConvertisseurAnnales}}" TextWrapping="NoWrap" Margin="20,0,0,0" Style="{StaticResource PhoneTextSubtleStyle}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <TextBox Grid.Row="1" Margin="0,0,169,0" Width="287" Text="" x:Name="loginCommande" />
+                    <Button Content="Go !" Height="72" HorizontalAlignment="Left" Margin="284,3,0,0" Name="button1" VerticalAlignment="Top" Width="160" Grid.Row="1" Tap="CommandeAnnales_Tap" />
+                    <TextBlock Visibility="Collapsed" Text="Chargement..." x:Name="TexteAnnales" Grid.Row="1" />
+                </Grid>
             </controls:PivotItem>
         </controls:Pivot>
     </Grid>

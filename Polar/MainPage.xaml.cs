@@ -13,6 +13,8 @@ using Microsoft.Phone.Controls;
 using System.Collections.ObjectModel;
 using System.Net.Browser;
 using System.IO;
+using System.ComponentModel;
+using System.Threading;
 
 namespace Polar
 {
@@ -42,9 +44,50 @@ namespace Polar
 
         private void StackPanel_Tap(object sender, GestureEventArgs e)
         {
-            var a = (((StackPanel)sender).Children[0]);
-            ajouterAuPanier(((TextBlock)a).Text);
-            passerCommande("superman");
+            var tblock = (TextBlock) (((StackPanel)sender).Children[0]);
+
+            if (panier.Contains(tblock.Text))
+            {
+                panier.Remove(tblock.Text);
+                tblock.FontStyle = FontStyles.Normal;
+            }
+            else
+            {
+                tblock.FontStyle = FontStyles.Italic;
+                ajouterAuPanier(tblock.Text);
+            }
+        }
+
+        private void CommandeAnnales_Tap(object sender, GestureEventArgs e)
+        {
+            button1.Visibility = Visibility.Collapsed;
+            loginCommande.Visibility = Visibility.Collapsed;
+            TexteAnnales.Visibility = Visibility.Visible;
+            TexteAnnales.Text = "Envoi de la commande...";
+
+            if (panier.Count == 0 || panier.Count > 8)
+            {
+                TexteAnnales.Text = "Choisissez entre 1 et 8 UVs.";
+                Perform(() => finCommande(), 2000);
+                return;
+            }
+
+            var client = new WebClient();
+            var texte = "login=" + loginCommande.Text + "&annales=";
+            int i = 0;
+            foreach (string nom in panier)
+            {
+                if (i > 0)
+                {
+                    texte += ",";
+                }
+                texte += nom;
+                i++;
+            }
+            //client.UploadStringCompleted += new UploadStringCompletedEventHandler(handlerCommande);
+            client.OpenReadCompleted += new OpenReadCompletedEventHandler(handlerCommande);
+            client.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?" + texte));
+            //client.UploadStringAsync(new Uri("http://assos.utc.fr/polar/annales/borne?commander"), texte);
         }
 
         private void ajouterAuPanier(string nom)
@@ -56,39 +99,39 @@ namespace Polar
 
         private List<string> panier;
 
-        private void passerCommande(string login)
-        {
-            if (panier.Count == 0 || panier.Count > 8) 
-            {
-                return;
-            }
-
-            var client = new WebClient();
-            var texte = "login=" + login + "&annales=";
-            int i = 0;
-            foreach (string nom in panier)
-            {
-                if (i > 0)
-                {
-                    texte += ",";
-                } 
-                texte += nom;
-                i++;
-            }
-            Date.Text = texte; // DEBUG
-            //client.UploadStringCompleted += new UploadStringCompletedEventHandler(handlerCommande);
-            client.OpenReadCompleted += new OpenReadCompletedEventHandler(handlerCommande);
-            client.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?"+texte));
-            //client.UploadStringAsync(new Uri("http://assos.utc.fr/polar/annales/borne?commander"), texte);
-        }
-
+    
         private void handlerCommande(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
             {
-                var reply = (Stream)e.Result;
-                Date.Text = new StreamReader(reply).ReadToEnd();
+                var replyText = new StreamReader(e.Result).ReadToEnd();
+                int number;
+                if (Int32.TryParse(replyText, out number))
+                    TexteAnnales.Text = "Commande enregistrée sous le n°" + replyText + " !";
+                else
+                    TexteAnnales.Text = replyText;
             }
+            else
+                TexteAnnales.Text = "Une erreur réseau s'est produite.";
+
+            Perform(() => finCommande(), 2000);
         }
+
+        private void Perform(Action myMethod, int delayInMilliseconds)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += (s, e) => Thread.Sleep(delayInMilliseconds);
+            worker.RunWorkerCompleted += (s, e) => myMethod.Invoke();
+            worker.RunWorkerAsync();
+        }
+
+        private void finCommande()
+        {
+            TexteAnnales.Text = "";
+            TexteAnnales.Visibility = Visibility.Collapsed;
+            button1.Visibility = Visibility.Visible;
+            loginCommande.Visibility = Visibility.Visible;
+        }
+
     }
 }

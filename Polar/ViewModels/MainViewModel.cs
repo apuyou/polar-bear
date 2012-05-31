@@ -26,12 +26,14 @@ namespace Polar
         public MainViewModel()
         {
             this.UVs = new ObservableCollection<UVViewModel>();
+            this.News = new ObservableCollection<NewsViewModel>();
         }
 
         /// <summary>
         /// Collection pour les objets ItemViewModel.
         /// </summary>
         public ObservableCollection<UVViewModel> UVs { get; private set; }
+        public ObservableCollection<NewsViewModel> News { get; private set; }
 
         public bool IsDataLoaded
         {
@@ -48,6 +50,10 @@ namespace Polar
             WebClient annalesDownloader = new WebClient();
             annalesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(annalesRecuperees);
             annalesDownloader.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?liste-annales"));
+
+            WebClient newsDownloader = new WebClient();
+            newsDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(newsRecuperees);
+            newsDownloader.OpenReadAsync(new Uri("http://assos.utc.fr/polar/news/index?json"));
 
             Uri horairesUri = new Uri("http://assos.utc.fr/polar/membres/horaires?json");
             WebClient horairesDownloader = new WebClient();
@@ -67,6 +73,20 @@ namespace Polar
                 foreach (Annale i in deserializedUser)
                 {
                     UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
+                }
+            }
+        }
+
+        private void newsRecuperees(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                List<News> deserializedUser = new List<News>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<News>;
+                foreach (News i in deserializedUser)
+                {
+                    News.Add(new NewsViewModel() { prenom = i.Prenom, date = i.date, contenu = i.news, titre = i.titre });
                 }
             }
         }
@@ -99,5 +119,19 @@ namespace Polar
         public string Nom;
         [DataMember]
         public int Pages;
+    }
+
+
+    [DataContract]
+    public class News
+    {
+        [DataMember]
+        public string Prenom;
+        [DataMember]
+        public string date;
+        [DataMember]
+        public string titre;
+        [DataMember]
+        public string news;
     }
 }
