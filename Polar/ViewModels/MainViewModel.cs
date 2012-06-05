@@ -26,12 +26,16 @@ namespace Polar
         public MainViewModel()
         {
             this.UVs = new ObservableCollection<UVViewModel>();
+            this.News = new ObservableCollection<NewsViewModel>();
+            this.Horaires = new ObservableCollection<HorairesViewModel>();
         }
 
         /// <summary>
         /// Collection pour les objets ItemViewModel.
         /// </summary>
         public ObservableCollection<UVViewModel> UVs { get; private set; }
+        public ObservableCollection<NewsViewModel> News { get; private set; }
+        public ObservableCollection<HorairesViewModel> Horaires { get; private set; }
 
         public bool IsDataLoaded
         {
@@ -44,25 +48,15 @@ namespace Polar
         /// </summary>
         public void LoadData()
         {
-            // Exemple de données ; remplacer par des données réelles
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "CM11", NbPages = 90 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "PI31", NbPages = 100 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-            this.UVs.Add(new UVViewModel() { NomUV = "MT22", NbPages = 10 });
-
-            List<Annale> deserializedUser = new List<Annale>();
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes("[{'Nom':'AP30', 'Pages':21}, {'Nom':'AR03', 'Pages':6}]"));
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
-            deserializedUser = ser.ReadObject(ms) as List<Annale>;
-            ms.Close();
-            foreach (Annale i in deserializedUser)
-            {
-                UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
-            }
-
             WebRequest.RegisterPrefix("http://assos.utc.fr/polar", WebRequestCreator.ClientHttp);
+            WebClient annalesDownloader = new WebClient();
+            annalesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(annalesRecuperees);
+            annalesDownloader.OpenReadAsync(new Uri("http://assos.utc.fr/polar/annales/json?liste-annales"));
+
+            WebClient newsDownloader = new WebClient();
+            newsDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(newsRecuperees);
+            newsDownloader.OpenReadAsync(new Uri("http://assos.utc.fr/polar/news/index?json"));
+
             Uri horairesUri = new Uri("http://assos.utc.fr/polar/membres/horaires?json");
             WebClient horairesDownloader = new WebClient();
             horairesDownloader.OpenReadCompleted += new OpenReadCompletedEventHandler(horairesDownloader_OpenReadCompleted);
@@ -71,13 +65,46 @@ namespace Polar
             this.IsDataLoaded = true;
         }
 
+        private void annalesRecuperees(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                List<Annale> deserializedUser = new List<Annale>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<Annale>;
+                foreach (Annale i in deserializedUser)
+                {
+                    UVs.Add(new UVViewModel() { NomUV = i.Nom, NbPages = i.Pages });
+                }
+            }
+        }
+
+        private void newsRecuperees(object sender, OpenReadCompletedEventArgs e)
+        {
+            if (e.Error == null)
+            {
+                List<News> deserializedUser = new List<News>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<News>;
+                foreach (News i in deserializedUser)
+                {
+                    News.Add(new NewsViewModel() { prenom = i.Prenom, date = i.date, contenu = i.news, titre = i.titre });
+                }
+            }
+        }
+
         private void horairesDownloader_OpenReadCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
             {
-                JsonTextReader horaires = new JsonTextReader(new StreamReader(e.Result));
-                JsonSerializer se = new JsonSerializer();
-                object parsedData = se.Deserialize(horaires);
+
+                List<Horaire> deserializedUser = new List<Horaire>();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedUser.GetType());
+                deserializedUser = ser.ReadObject(e.Result) as List<Horaire>;
+                foreach (Horaire i in deserializedUser)
+                {
+                    Horaires.Add(new HorairesViewModel() { Jour = i.jour, Heures = i.heures});
+                }
             }
         }
 
@@ -99,5 +126,27 @@ namespace Polar
         public string Nom;
         [DataMember]
         public int Pages;
+    }
+
+    [DataContract]
+    public class Horaire
+    {
+        [DataMember]
+        public string jour;
+        [DataMember]
+        public string heures;
+    }
+
+    [DataContract]
+    public class News
+    {
+        [DataMember]
+        public string Prenom;
+        [DataMember]
+        public string date;
+        [DataMember]
+        public string titre;
+        [DataMember]
+        public string news;
     }
 }
